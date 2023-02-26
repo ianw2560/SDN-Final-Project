@@ -28,9 +28,5 @@ class MyTopo(Topo):
             for j in range(i + 1, 12):
                 self.addLink(switches[i], switches[j], bw=1000)
 
-if __name__ == '__main__':
-    topo = MyTopo()
-    net = Mininet(topo=topo, controller=Controller)
-    net.start()
-    CLI(net)
-    net.stop()
+
+topos = { 'mytopo': ( lambda: MyTopo() ) }
