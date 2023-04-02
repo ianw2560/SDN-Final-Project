@@ -51,10 +51,15 @@ class MyTopo(Topo):
         self.addLink(switches[8-1], switches[5-1], bw=1000)
         self.addLink(switches[9-1], switches[6-1], bw=1000)
 
-def simpleTest(num_attackers=5, seconds=10):
-    "Create and test a simple network"
-    #topo = MyTopo()
-    topo = SingleSwitchTopo( 10 )
+def scenarioS1(num_attackers, duration):
+
+    """
+    In Scenario S1, the number of attackers varies from 20 to 120.
+    Each attacker sends three SYN packets every second.
+    Two benign hosts send HTTP GET requests every 4 seconds.
+    """
+    topo = MyTopo()
+    #topo = SingleSwitchTopo( 10 )
 
     ovs13 = partial(OVSSwitch, protocols='OpenFlow13')
 
@@ -66,21 +71,20 @@ def simpleTest(num_attackers=5, seconds=10):
                   waitConnected=True)
     net.addController('c0', controller=RemoteController, ip='192.168.56.106', port=6653)
 
-
     net.start()
 
     hosts = net.hosts
-    # benign1 = net.get('h4_31')
-    # benign2 = net.get('h4_32')
+    benign1 = net.get('h4_31')
+    benign2 = net.get('h4_32')
 
-    # info('benign1 IP:', benign1.IP(),'\n')
-    # info('benign2 IP:', benign2.IP(),'\n')
+    info('benign1 IP:', benign1.IP(),'\n')
+    info('benign2 IP:', benign2.IP(),'\n')
 
     info( "Starting test...\n" )
 
     server = hosts[-1]
 
-    attacker_hosts = hosts[:5]
+    attackers = hosts[:num_attackers]
 
     info("Starting HTTP server on tcp_server host...\n")
     print( server.cmd('python3 -m http.server 80 &') )
@@ -88,31 +92,59 @@ def simpleTest(num_attackers=5, seconds=10):
 
     info("The IP of the TCP server is:", server.IP(),"\n")
 
-    print( server.cmd('tcpdump -i h10-eth0 -w syn_flood_capture'+str(seconds)+'sec.pcap &') )
-    #print( server.cmd('tcpdump -i tcp_server-eth0 -w syn_flood_capture'+str(seconds)+'sec.pcap &') )
+    #print( server.cmd('tcpdump -i h10-eth0 -w scenario1_'+str(num_attackers)+'attackers_'+str(duration)+'sec.pcap &') )
+    print( server.cmd('tcpdump -i tcp_server-eth0 -w scenario1_'+str(num_attackers)+'attackers_'+str(duration)+'sec.pcap &') )
 
     # Let tcpdump initalize
     time.sleep(1)
     
-    info( "Monitoring output for", seconds, "seconds\n" )
-    endTime = time.time() + seconds
-    # while time.time() < endTime:
-    #     benign1.cmd('wget -O -', server.IP())
-    #     benign2.cmd('wget -O -', server.IP())
-    #     time.sleep(4)
+    info( "Monitoring output for", duration, "seconds\n" )
+    endTime = time.time() + duration
+    num_get_reqs = 0
+    # Send SYN packets and HTTP requests for
     while time.time() < endTime:
-        for h in attacker_hosts:
-            h.cmd('hping3 -c 1 -S -a', h.IP(), server.IP())
+        
+        for h in attackers:
+            h.cmd('hping3 -c 3 -S  --rand-source', server.IP(), '&')
 
-        net.get('h7').cmd('wget -O -', server.IP())
-        net.get('h8').cmd('wget -O -', server.IP())
-        time.sleep(4)
+        time.sleep(1)
+
+        for h in attackers:
+             h.cmd('hping3 -c 3 -S  --rand-source', server.IP(), '&')
+
+        time.sleep(1)
+
+        for h in attackers:
+             h.cmd('hping3 -c 3 -S  --rand-source', server.IP(), '&')
+
+        time.sleep(1)
+
+        for h in attackers:
+             h.cmd('hping3 -c 3 -S  --rand-source', server.IP(), '&')
+
+        info("Sending GET requests...\n")
+        num_get_reqs = num_get_reqs + 1
+        benign1.cmd('wget -O -', server.IP())
+        benign2.cmd('wget -O -', server.IP())
+        time.sleep(1)
 
     print( server.cmd('kill %tcpdump') )
+
+    info("Total number of GET requests:", num_get_reqs,"\n")
 
     net.stop()
 
 if __name__ == '__main__':
+
     # Tell mininet to print useful information
     setLogLevel('info')
-    simpleTest(num_attackers=5, seconds=20)
+
+    test_duration = 60
+
+    scenarioS1(num_attackers=0, duration=test_duration)
+    scenarioS1(num_attackers=20, duration=test_duration)
+    scenarioS1(num_attackers=40, duration=test_duration)
+    scenarioS1(num_attackers=60, duration=test_duration)
+    scenarioS1(num_attackers=80, duration=test_duration)
+    scenarioS1(num_attackers=100, duration=test_duration)
+    scenarioS1(num_attackers=120, duration=test_duration)
