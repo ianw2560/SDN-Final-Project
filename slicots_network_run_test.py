@@ -103,7 +103,7 @@ def scenarioS1(num_attackers, duration):
     info( "Starting test...\n" )
 
     # Start tcpdump to listen on tcp_server-eth0 interface
-    print( server.cmd('tcpdump -i tcp_server-eth0 -w captures/scenario1_'+str(num_attackers)+'attackers_'+str(duration)+'sec.pcap &') )
+    print( server.cmd('tcpdump -i tcp_server-eth0 -w scenario1_'+str(num_attackers)+'attackers_'+str(duration)+'sec.pcap &') )
 
     # Let tcpdump initalize
     time.sleep(1)
@@ -150,7 +150,7 @@ if __name__ == '__main__':
     # Tell mininet to print useful information
     setLogLevel('info')
 
-    test_duration = 60
+    test_duration = 180
 
     scenarioS1(num_attackers=0, duration=test_duration)
     scenarioS1(num_attackers=20, duration=test_duration)
