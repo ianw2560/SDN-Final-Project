@@ -58,42 +58,52 @@ def scenarioS1(num_attackers, duration):
     Each attacker sends three SYN packets every second.
     Two benign hosts send HTTP GET requests every 4 seconds.
     """
-    topo = MyTopo()
-    #topo = SingleSwitchTopo( 10 )
 
+    # Build Mininet network
+    topo = MyTopo()
+
+    # Specify switch configuration
     ovs13 = partial(OVSSwitch, protocols='OpenFlow13')
 
+    # Mininet constructor
     net = Mininet(topo=topo, 
                   controller=None,
                   link=TCLink,
                   switch=ovs13,
                   autoSetMacs=True,
                   waitConnected=True)
+
+    # Add controller
     net.addController('c0', controller=RemoteController, ip='192.168.56.106', port=6653)
 
     net.start()
 
     hosts = net.hosts
+
+    # Set up the two constant benign hosts
     benign1 = net.get('h4_31')
     benign2 = net.get('h4_32')
 
     info('benign1 IP:', benign1.IP(),'\n')
     info('benign2 IP:', benign2.IP(),'\n')
 
-    info( "Starting test...\n" )
-
+    # Make the server the last host
     server = hosts[-1]
 
+    # Set hosts to be attackers
     attackers = hosts[:num_attackers]
 
+    # Start HTTP server on tcp_server host
     info("Starting HTTP server on tcp_server host...\n")
     print( server.cmd('python3 -m http.server 80 &') )
     
 
     info("The IP of the TCP server is:", server.IP(),"\n")
 
-    #print( server.cmd('tcpdump -i h10-eth0 -w scenario1_'+str(num_attackers)+'attackers_'+str(duration)+'sec.pcap &') )
-    print( server.cmd('tcpdump -i tcp_server-eth0 -w scenario1_'+str(num_attackers)+'attackers_'+str(duration)+'sec.pcap &') )
+    info( "Starting test...\n" )
+
+    # Start tcpdump to listen on tcp_server-eth0 interface
+    print( server.cmd('tcpdump -i tcp_server-eth0 -w captures/scenario1_'+str(num_attackers)+'attackers_'+str(duration)+'sec.pcap &') )
 
     # Let tcpdump initalize
     time.sleep(1)
@@ -101,7 +111,8 @@ def scenarioS1(num_attackers, duration):
     info( "Monitoring output for", duration, "seconds\n" )
     endTime = time.time() + duration
     num_get_reqs = 0
-    # Send SYN packets and HTTP requests for
+
+    # Send SYN packets and HTTP requests
     while time.time() < endTime:
         
         for h in attackers:
