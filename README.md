@@ -8,6 +8,9 @@ The packet capture for different numbers of attackers over a 180 second period c
 
 As of now, only packets captured from an unmodified Floodlight build have been generated.
 
+This projected includes the `ModifiedSLICOTS.java` and `Connection.java` for ease of reading to see what they do. The entire modified Floodlight controller, with these files correctly integrated into the controller, can be found [here](https://github.com/ianw2560/Floodlight-ModifiedSLICOTS). 
+Additionally, you see the exact files that were changed [here](https://github.com/ianw2560/Floodlight-ModifiedSLICOTS/commit/56e91063f3d126504dcd88c539870586fc2ec3d7).
+
 ## Results
 
 ![Scenario 1 Results](results/results_scenario1.PNG)
