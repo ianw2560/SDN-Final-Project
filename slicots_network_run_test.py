@@ -103,7 +103,7 @@ def scenarioS1(num_attackers, duration):
     info( "Starting test...\n" )
 
     # Start tcpdump to listen on tcp_server-eth0 interface
-    print( server.cmd('tcpdump -i tcp_server-eth0 -w scenario1_'+str(num_attackers)+'attackers_'+str(duration)+'sec.pcap &') )
+    print( server.cmd('tcpdump -i tcp_server-eth0 -w test_scenario1_'+str(num_attackers)+'attackers_'+str(duration)+'sec.pcap &') )
 
     # Let tcpdump initalize
     time.sleep(1)
