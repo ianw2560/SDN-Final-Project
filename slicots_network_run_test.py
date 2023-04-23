@@ -51,7 +51,7 @@ class MyTopo(Topo):
         self.addLink(switches[8-1], switches[5-1], bw=1000)
         self.addLink(switches[9-1], switches[6-1], bw=1000)
 
-def scenarioS1(num_attackers, duration):
+def scenarioS1(num_attackers, duration, controller_ip):
 
     """
     In Scenario S1, the number of attackers varies from 20 to 120.
@@ -74,7 +74,7 @@ def scenarioS1(num_attackers, duration):
                   waitConnected=True)
 
     # Add controller
-    net.addController('c0', controller=RemoteController, ip='192.168.56.106', port=6653)
+    net.addController('c0', controller=RemoteController, ip=controller_ip, port=6653)
 
     net.start()
 
@@ -152,10 +152,12 @@ if __name__ == '__main__':
 
     test_duration = 180
 
-    scenarioS1(num_attackers=0, duration=test_duration)
-    scenarioS1(num_attackers=20, duration=test_duration)
-    scenarioS1(num_attackers=40, duration=test_duration)
-    scenarioS1(num_attackers=60, duration=test_duration)
-    scenarioS1(num_attackers=80, duration=test_duration)
-    scenarioS1(num_attackers=100, duration=test_duration)
-    scenarioS1(num_attackers=120, duration=test_duration)
+    controller_ip = '192.168.56.108'
+
+    scenarioS1(num_attackers=0, duration=test_duration, controller_ip=controller_ip)
+    scenarioS1(num_attackers=20, duration=test_duration, controller_ip=controller_ip)
+    scenarioS1(num_attackers=40, duration=test_duration, controller_ip=controller_ip)
+    scenarioS1(num_attackers=60, duration=test_duration, controller_ip=controller_ip)
+    scenarioS1(num_attackers=80, duration=test_duration, controller_ip=controller_ip)
+    scenarioS1(num_attackers=100, duration=test_duration, controller_ip=controller_ip)
+    scenarioS1(num_attackers=120, duration=test_duration, controller_ip=controller_ip)
